@@ -12,7 +12,11 @@ export function renderGameCards(containerEl, games) {
     return `
       <a class="card" href="/src/pages/game.html?id=${encodeURIComponent(g.id)}">
         <div class="cover">
-          ${g.coverUrl ? `<img src="${g.coverUrl}" alt="${escapeHtml(g.name)} cover" />` : "No cover"}
+          ${
+            g.coverUrl
+              ? `<img class="cover-img" src="${g.coverUrl}" alt="${escapeHtml(g.name)} cover" />`
+              : `<span>No cover</span>`
+          }
         </div>
 
         <div class="card-body">

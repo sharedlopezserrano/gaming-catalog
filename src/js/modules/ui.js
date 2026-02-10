@@ -5,12 +5,13 @@ export function renderGameCards(containerEl, games) {
     containerEl.innerHTML = `<div class="pill">No games found.</div>`;
     return;
   }
+  const base = import.meta.env.BASE_URL;
 
   const cards = games.map((g) => {
     const ratingText = Number.isFinite(g.rating) ? `${Math.round(g.rating)}` : "N/A";
 
     return `
-      <a class="card" href="/src/pages/game.html?id=${encodeURIComponent(g.id)}">
+      <a class="card" href="${base}src/pages/game.html?id=${encodeURIComponent(g.id)}">
         <div class="cover">
           ${
             g.coverUrl

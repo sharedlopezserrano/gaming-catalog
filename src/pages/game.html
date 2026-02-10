@@ -9,12 +9,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
+    <link rel="icon" href="/favicon.ico" />
     <link rel="stylesheet" href="../css/styles.css" />
   </head>
   <body>
     <header>
       <div class="container nav">
-        <a class="brand" href="/">
+        <a class="brand" href="/gaming-catalog/">
           <span>⬅ Back</span>
           <span class="badge">Game Info</span>
         </a>
@@ -22,15 +23,30 @@
     </header>
 
     <main class="container">
-      <h1 id="title">Loading...</h1>
-      <p class="section-title" id="gameIdText"></p>
+      <h1 id="gameTitle">Loading...</h1>
+      <div id="gameMeta" class="detail-meta"></div>
+
+      <p id="gameStatus" class="section-title"></p>
+
+      <section class="detail-layout">
+        <div id="gameCover"></div>
+
+        <div class="detail-info">
+          <h2 class="section-title">Summary</h2>
+          <p id="gameSummary"></p>
+
+          <h2 class="section-title">Genres</h2>
+          <p id="gameGenres" class="pill"></p>
+
+          <h2 class="section-title">Platforms</h2>
+          <p id="gamePlatforms" class="pill"></p>
+        </div>
+      </section>
+
+      <h2 class="section-title">Screenshots</h2>
+      <section id="screenshots" class="shots-grid"></section>
     </main>
 
-    <script type="module">
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get("id");
-      document.querySelector("#gameIdText").textContent = id ? `Game ID: ${id}` : "No ID found.";
-      document.querySelector("#title").textContent = "Game Info Page (API next)";
-    </script>
+    <script type="module" src="/src/js/game.js"></script>
   </body>
 </html>

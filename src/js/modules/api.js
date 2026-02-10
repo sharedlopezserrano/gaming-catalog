@@ -14,10 +14,7 @@ export async function searchGames(query) {
   });
 
   const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new Error(data?.error || `Search failed (${res.status})`);
-  }
+  if (!res.ok) throw new Error(data?.error || `Search failed (${res.status})`);
 
   return data;
 }
@@ -27,10 +24,7 @@ export async function getGame(id) {
 
   const res = await fetch(`${BASE}/api/game/${id}`);
   const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new Error(data?.error || `Details failed (${res.status})`);
-  }
+  if (!res.ok) throw new Error(data?.error || `Details failed (${res.status})`);
 
   return data;
 }
@@ -40,10 +34,7 @@ export async function getScreenshots(id) {
 
   const res = await fetch(`${BASE}/api/game/${id}/screenshots`);
   const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new Error(data?.error || `Screenshots failed (${res.status})`);
-  }
+  if (!res.ok) throw new Error(data?.error || `Screenshots failed (${res.status})`);
 
   return data;
 }

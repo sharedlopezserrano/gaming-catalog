@@ -1,5 +1,5 @@
 import { renderGameCards } from "./modules/ui.js";
-import { searchGames, getGenres } from "./modules/api.js";
+import { searchGames, getGenres, getTopRated, getNewReleases } from "./modules/api.js";
 import { getFavorites, getFavoriteIds, addFavorite, removeFavorite } from "./modules/storage.js";
 
 const searchForm = document.querySelector("#searchForm");
@@ -7,11 +7,19 @@ const searchInput = document.querySelector("#searchInput");
 const resultsGrid = document.querySelector("#resultsGrid");
 const favoritesGrid = document.querySelector("#favoritesGrid");
 const statusText = document.querySelector("#statusText");
+
 const sortSelect = document.querySelector("#sortSelect");
 const platformSelect = document.querySelector("#platformSelect");
 const genreSelect = document.querySelector("#genreSelect");
 
+const navLinks = document.querySelectorAll(".nav-link");
+const homeSection = document.querySelector("#homeSection");
+const favoritesTitle = document.querySelector("#favoritesSectionTitle");
+const resultsTitle = document.querySelector("#resultsTitle");
+const resultsSection = document.querySelector("#resultsSection");
+
 let lastResults = [];
+let currentView = "home";
 
 function unixToYear(unix) {
   if (!unix) return null;
@@ -46,8 +54,42 @@ function refreshResultsUI() {
 
 refreshFavoritesUI();
 
+/* ---------------- Genres (popular only) ---------------- */
+const POPULAR_GENRES = new Set([
+  "Action",
+  "Adventure",
+  "Role-playing (RPG)",
+  "Shooter",
+  "Strategy",
+  "Sports",
+  "Racing",
+  "Platform",
+  "Puzzle",
+  "Fighting",
+  "Simulator",
+  "Indie",
+  "Arcade",
+]);
+
+async function loadGenres() {
+  try {
+    const allGenres = await getGenres();
+    const popular = allGenres.filter((g) => POPULAR_GENRES.has(g.name));
+
+    genreSelect.innerHTML =
+      `<option value="">All</option>` +
+      popular.map((g) => `<option value="${g.id}">${g.name}</option>`).join("");
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+loadGenres();
+
+/* ---------------- Search (Home) ---------------- */
 searchForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  currentView = "home";
 
   const q = searchInput.value.trim();
   if (!q) {
@@ -82,37 +124,7 @@ searchForm.addEventListener("submit", async (e) => {
   }
 });
 
-  const POPULAR_GENRES = new Set([
-    "Action",
-    "Adventure",
-    "Role-playing (RPG)",
-    "Shooter",
-    "Strategy",
-    "Sports",
-    "Racing",
-    "Platform",
-    "Puzzle",
-    "Fighting",
-    "Simulator",
-    "Indie",
-    "Arcade",
-  ]);
-
-  async function loadGenres() {
-    try {
-      const allGenres = await getGenres();
-      const popular = allGenres.filter((g) => POPULAR_GENRES.has(g.name));
-
-      genreSelect.innerHTML =
-        `<option value="">All</option>` +
-        popular.map((g) => `<option value="${g.id}">${g.name}</option>`).join("");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-loadGenres();
-
+/* ---------------- Favorites click (delegation) ---------------- */
 function onFavClick(e) {
   const btn = e.target.closest("button[data-action]");
   if (!btn) return;
@@ -144,14 +156,125 @@ function onFavClick(e) {
 resultsGrid.addEventListener("click", onFavClick);
 favoritesGrid.addEventListener("click", onFavClick);
 
-// change events
+/* ---------------- Views / Navbar ---------------- */
+function setActiveNav(view) {
+  navLinks.forEach((a) => {
+    a.classList.toggle("is-active", a.dataset.view === view);
+  });
+}
+
+function showHomeView() {
+  setActiveNav("home");
+  statusText.textContent = "";
+  homeSection?.classList.remove("hidden");
+
+  favoritesTitle?.classList.remove("hidden");
+  favoritesGrid?.classList.remove("hidden");
+
+  resultsTitle?.classList.remove("hidden");
+  resultsSection?.classList.remove("hidden");
+}
+
+function showFavoritesView() {
+  setActiveNav("favorites");
+  statusText.textContent = "";
+  homeSection?.classList.add("hidden");
+
+  resultsTitle?.classList.add("hidden");
+  resultsSection?.classList.add("hidden");
+
+  favoritesTitle?.classList.remove("hidden");
+  favoritesGrid?.classList.remove("hidden");
+
+  favoritesTitle?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function loadPreset(kind) {
+  try {
+    const platform = platformSelect?.value || "";
+    const genre = genreSelect?.value || "";
+
+    statusText.textContent = "Loading...";
+    resultsGrid.innerHTML = "";
+
+    let games = [];
+    if (kind === "top") {
+      games = await getTopRated({ platform, genre });
+      resultsTitle.textContent = "Top Rated";
+    } else {
+      games = await getNewReleases({ platform, genre });
+      resultsTitle.textContent = "New Releases";
+    }
+
+    lastResults = games.map((g) => ({
+      id: g.id,
+      name: g.name,
+      rating: Number.isFinite(g.rating) ? g.rating : null,
+      releaseYear: unixToYear(g.first_release_date),
+      coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
+    }));
+
+    refreshResultsUI();
+    statusText.textContent = `Showing ${lastResults.length} games`;
+  } catch (e) {
+    console.error(e);
+    statusText.textContent = `Error: ${e.message}`;
+  }
+}
+
+navLinks.forEach((a) => {
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    const view = a.dataset.view;
+
+    if (view === "home") {
+      currentView = "home";
+      showHomeView();
+      resultsTitle.textContent = "Results";
+      return;
+    }
+
+    if (view === "favorites") {
+      currentView = "favorites";
+      showFavoritesView();
+      return;
+    }
+
+    if (view === "top") {
+      currentView = "top";
+      showHomeView();
+      loadPreset("top");
+      return;
+    }
+
+    if (view === "new") {
+      currentView = "new";
+      showHomeView();
+      loadPreset("new");
+      return;
+    }
+  });
+});
+
+/* ---------------- Controls events ---------------- */
 sortSelect?.addEventListener("change", () => {
+  // Sort only makes sense for search results (home view)
+  if (currentView !== "home") return;
   applySort(sortSelect.value);
   refreshResultsUI();
 });
 
-platformSelect?.addEventListener("change", () => searchForm.requestSubmit());
-genreSelect?.addEventListener("change", () => searchForm.requestSubmit());
+platformSelect?.addEventListener("change", () => {
+  if (currentView === "top") return loadPreset("top");
+  if (currentView === "new") return loadPreset("new");
+  searchForm.requestSubmit();
+});
+
+genreSelect?.addEventListener("change", () => {
+  if (currentView === "top") return loadPreset("top");
+  if (currentView === "new") return loadPreset("new");
+  searchForm.requestSubmit();
+});
 
 searchInput.addEventListener("input", () => {
   if (searchInput.value.trim() === "") statusText.textContent = "Ready to search…";

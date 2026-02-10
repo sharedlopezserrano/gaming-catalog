@@ -174,5 +174,62 @@ app.get("/api/genres", async (req, res) => {
   }
 });
 
+app.get("/api/top-rated", async (req, res) => {
+  try {
+    const platform = Number(req.query.platform || 0);
+    const genre = Number(req.query.genre || 0);
+
+    const whereParts = [
+      "rating != null",
+      "rating_count > 50",
+      "category = 0"
+    ];
+    if (platform) whereParts.push(`platforms = (${platform})`);
+    if (genre) whereParts.push(`genres = (${genre})`);
+
+    const data = await igdb(
+      "games",
+      `
+      fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+      where ${whereParts.join(" & ")};
+      sort rating desc;
+      limit 24;
+    `
+    );
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/new-releases", async (req, res) => {
+  try {
+    const platform = Number(req.query.platform || 0);
+    const genre = Number(req.query.genre || 0);
+
+    const whereParts = [
+      "first_release_date != null",
+      "category = 0"
+    ];
+    if (platform) whereParts.push(`platforms = (${platform})`);
+    if (genre) whereParts.push(`genres = (${genre})`);
+
+    const data = await igdb(
+      "games",
+      `
+      fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+      where ${whereParts.join(" & ")};
+      sort first_release_date desc;
+      limit 24;
+    `
+    );
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`IGDB proxy running on port ${PORT}`));

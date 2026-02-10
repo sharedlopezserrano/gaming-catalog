@@ -45,3 +45,27 @@ export async function getScreenshots(id) {
 
   return data;
 }
+
+export async function getTopRated({ platform = "", genre = "" } = {}) {
+  assertBase();
+  const params = new URLSearchParams();
+  if (platform) params.set("platform", platform);
+  if (genre) params.set("genre", genre);
+
+  const res = await fetch(`${BASE}/api/top-rated?${params.toString()}`);
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error || "Failed to load top rated");
+  return data;
+}
+
+export async function getNewReleases({ platform = "", genre = "" } = {}) {
+  assertBase();
+  const params = new URLSearchParams();
+  if (platform) params.set("platform", platform);
+  if (genre) params.set("genre", genre);
+
+  const res = await fetch(`${BASE}/api/new-releases?${params.toString()}`);
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error || "Failed to load new releases");
+  return data;
+}

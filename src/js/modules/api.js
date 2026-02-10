@@ -54,7 +54,7 @@ export async function getTopRated({ platform = "", genre = "" } = {}) {
 
   const res = await fetch(`${BASE}/api/top-rated?${params.toString()}`);
   const data = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(data?.error || "Failed to load top rated");
+  if (!res.ok) throw new Error(data?.error || `Top rated failed (${res.status})`);
   return data;
 }
 
@@ -66,6 +66,6 @@ export async function getNewReleases({ platform = "", genre = "" } = {}) {
 
   const res = await fetch(`${BASE}/api/new-releases?${params.toString()}`);
   const data = await res.json().catch(() => null);
-  if (!res.ok) throw new Error(data?.error || "Failed to load new releases");
+  if (!res.ok) throw new Error(data?.error || `New releases failed (${res.status})`);
   return data;
 }

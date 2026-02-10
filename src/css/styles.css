@@ -207,7 +207,144 @@ main{ padding: 22px 0 60px; }
 .shot:hover{
   transform: translateY(-2px);
 }
+.fav-btn{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
 
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.35);
+  color: white;
+
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.card{ position: relative; }
+
+.fav-btn:hover{
+  transform: scale(1.06);
+  border-color: rgba(225,29,72,.5);
+}
+
+.fav-btn.is-fav{
+  background: rgba(225,29,72,.25);
+  border-color: rgba(225,29,72,.6);
+}
+
+.fav-btn.pop{
+  animation: favPop .22s ease;
+}
+
+.favorites-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+#favoritesGrid{
+  grid-template-columns: repeat(auto-fit, minmax(140px, 180px));
+  justify-content: center;
+}
+
+#favoritesGrid .card{
+  width: 100%;
+  max-width: 180px;
+}
+
+#favoritesGrid .cover{
+  aspect-ratio: 3/4.2;
+}
+
+#favoritesGrid .card-title{
+  font-size: 12px;
+  min-height: 28px;
+}
+
+#favoritesGrid .meta{
+  font-size: 11px;
+}
+
+#favoritesGrid .fav-btn{
+  width: 32px;
+  height: 32px;
+  top: 8px;
+  right: 8px;
+}
+
+.controls{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 10px 0 16px;
+}
+
+.controls label{
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.controls select{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, 0.04);
+  outline: none;
+}
+.results-layout{
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.filters-panel{
+  position: sticky;
+  top: 100px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: grid;
+  gap: 14px;
+}
+
+.filters-panel label{
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.filters-panel select{
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  outline: none;
+}
+
+@media (max-width: 900px){
+  .results-layout{
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes favPop{
+  0%{ transform: scale(1); }
+  50%{ transform: scale(1.25); }
+  100%{ transform: scale(1); }
+}
 
 @media (max-width: 720px){
   .detail-layout{

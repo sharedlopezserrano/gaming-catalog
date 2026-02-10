@@ -9,6 +9,7 @@ const platformsEl = document.querySelector("#gamePlatforms");
 const shotsEl = document.querySelector("#screenshots");
 const statusEl = document.querySelector("#gameStatus");
 
+
 function yearFromUnix(unix) {
   if (!unix) return "—";
   return new Date(unix * 1000).getFullYear();

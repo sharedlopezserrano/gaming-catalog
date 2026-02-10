@@ -97,13 +97,24 @@ app.get("/api/search", async (req, res) => {
 app.post("/api/search", async (req, res) => {
   try {
     const q = String(req.body.q || "").trim();
+    const sort = String(req.body.sort || "").trim(); // "-rating", "-first_release_date", "name"
+    const platform = Number(req.body.platform || 0); // 6, 48, 49, 130...
+
     if (!q) return res.status(400).json({ error: "Missing q" });
+
+    const whereParts = [];
+    if (platform) whereParts.push(`platforms = (${platform})`);
+
+    const whereClause = whereParts.length ? `where ${whereParts.join(" & ")};` : "";
+    const sortClause = sort ? `sort ${sort};` : "";
 
     const data = await igdb(
       "games",
       `
       search "${q.replaceAll('"', '\\"')}";
       fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+      ${whereClause}
+      ${sortClause}
       limit 24;
     `
     );

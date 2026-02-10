@@ -4,18 +4,25 @@ function assertBase() {
   if (!BASE) throw new Error("Missing VITE_API_BASE in .env");
 }
 
-export async function searchGames({ q, sort = "", platform = "" }) {
+export async function searchGames({ q, platform = "", genre = "" }) {
   assertBase();
 
   const res = await fetch(`${BASE}/api/search`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ q, sort, platform }),
+    body: JSON.stringify({ q, platform, genre })    
   });
 
   const data = await res.json().catch(() => null);
   if (!res.ok) throw new Error(data?.error || `Search failed (${res.status})`);
 
+  return data;
+}
+
+export async function getGenres() {
+  const res = await fetch(`${BASE}/api/genres`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || "Failed to load genres");
   return data;
 }
 

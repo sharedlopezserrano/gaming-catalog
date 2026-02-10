@@ -1,5 +1,5 @@
 import { renderGameCards } from "./modules/ui.js";
-import { searchGames } from "./modules/api.js";
+import { searchGames, getGenres } from "./modules/api.js";
 import { getFavorites, getFavoriteIds, addFavorite, removeFavorite } from "./modules/storage.js";
 
 const searchForm = document.querySelector("#searchForm");
@@ -9,6 +9,7 @@ const favoritesGrid = document.querySelector("#favoritesGrid");
 const statusText = document.querySelector("#statusText");
 const sortSelect = document.querySelector("#sortSelect");
 const platformSelect = document.querySelector("#platformSelect");
+const genreSelect = document.querySelector("#genreSelect");
 
 let lastResults = [];
 
@@ -59,7 +60,8 @@ searchForm.addEventListener("submit", async (e) => {
 
   try {
     const platform = platformSelect?.value || "";
-    const games = await searchGames({ q, platform });
+    const genre = genreSelect?.value || "";
+    const games = await searchGames({ q, platform, genre });
 
     lastResults = games.map((g) => ({
       id: g.id,
@@ -79,6 +81,37 @@ searchForm.addEventListener("submit", async (e) => {
     statusText.textContent = `Error: ${err.message}`;
   }
 });
+
+  const POPULAR_GENRES = new Set([
+    "Action",
+    "Adventure",
+    "Role-playing (RPG)",
+    "Shooter",
+    "Strategy",
+    "Sports",
+    "Racing",
+    "Platform",
+    "Puzzle",
+    "Fighting",
+    "Simulator",
+    "Indie",
+    "Arcade",
+  ]);
+
+  async function loadGenres() {
+    try {
+      const allGenres = await getGenres();
+      const popular = allGenres.filter((g) => POPULAR_GENRES.has(g.name));
+
+      genreSelect.innerHTML =
+        `<option value="">All</option>` +
+        popular.map((g) => `<option value="${g.id}">${g.name}</option>`).join("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+loadGenres();
 
 function onFavClick(e) {
   const btn = e.target.closest("button[data-action]");
@@ -118,6 +151,7 @@ sortSelect?.addEventListener("change", () => {
 });
 
 platformSelect?.addEventListener("change", () => searchForm.requestSubmit());
+genreSelect?.addEventListener("change", () => searchForm.requestSubmit());
 
 searchInput.addEventListener("input", () => {
   if (searchInput.value.trim() === "") statusText.textContent = "Ready to search…";

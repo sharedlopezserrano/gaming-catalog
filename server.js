@@ -66,7 +66,6 @@ app.get("/", (req, res) => {
   );
 });
 
-// optional browser test: /api/search?q=mario
 app.get("/api/search", async (req, res) => {
   try {
     const q = String(req.query.q || "").trim();
@@ -87,10 +86,9 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Main endpoint: supports platform filter.
-// IMPORTANT: no "sort" here because IGDB forbids search+sort.
 app.post("/api/search", async (req, res) => {
   try {
+    
     const q = String(req.body.q || "").trim();
     const platform = Number(req.body.platform || 0);
 
@@ -98,6 +96,10 @@ app.post("/api/search", async (req, res) => {
 
     const whereParts = [];
     if (platform) whereParts.push(`platforms = (${platform})`);
+
+    const genre = Number(req.body.genre || 0);
+    if (genre) whereParts.push(`genres = (${genre})`);
+    
     const whereClause = whereParts.length ? `where ${whereParts.join(" & ")};` : "";
 
     const data = await igdb(
@@ -150,6 +152,22 @@ app.get("/api/game/:id/screenshots", async (req, res) => {
     `
     );
 
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/genres", async (req, res) => {
+  try {
+    const data = await igdb(
+      "genres",
+      `
+      fields id,name;
+      sort name asc;
+      limit 200;
+    `
+    );
     res.json(data);
   } catch (e) {
     res.status(500).json({ error: e.message });

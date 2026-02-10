@@ -57,6 +57,10 @@ async function igdb(endpoint, body) {
   return res.json();
 }
 
+app.get("/", (req, res) => {
+  res.send("IGDB Proxy is running  Use /api/search, /api/game/:id, /api/game/:id/screenshots");
+});
+
 app.post("/api/search", async (req, res) => {
   try {
     const q = String(req.body.q || "").trim();

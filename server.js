@@ -122,14 +122,20 @@ app.get("/api/game/:id/screenshots", async (req, res) => {
   }
 });
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    ok: true,
-    hasClientId: Boolean(process.env.TWITCH_CLIENT_ID),
-    hasClientSecret: Boolean(process.env.TWITCH_CLIENT_SECRET),
-    clientIdLen: process.env.TWITCH_CLIENT_ID?.length ?? 0,
-    clientSecretLen: process.env.TWITCH_CLIENT_SECRET?.length ?? 0,
-  });
+app.get("/api/token-test", async (req, res) => {
+  try {
+    const url =
+      `https://id.twitch.tv/oauth2/token` +
+      `?client_id=${process.env.TWITCH_CLIENT_ID}` +
+      `&client_secret=${process.env.TWITCH_CLIENT_SECRET}` +
+      `&grant_type=client_credentials`;
+
+    const r = await fetch(url, { method: "POST" });
+    const text = await r.text();
+    res.status(r.status).send(text);
+  } catch (e) {
+    res.status(500).send(String(e.message || e));
+  }
 });
 
 const PORT = process.env.PORT || 3001;

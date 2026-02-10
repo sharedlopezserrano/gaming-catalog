@@ -122,5 +122,15 @@ app.get("/api/game/:id/screenshots", async (req, res) => {
   }
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    hasClientId: Boolean(process.env.TWITCH_CLIENT_ID),
+    hasClientSecret: Boolean(process.env.TWITCH_CLIENT_SECRET),
+    clientIdLen: process.env.TWITCH_CLIENT_ID?.length ?? 0,
+    clientSecretLen: process.env.TWITCH_CLIENT_SECRET?.length ?? 0,
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`IGDB proxy running on http://localhost:${PORT}`));

@@ -29,7 +29,6 @@ searchForm.addEventListener("submit", async (e) => {
       id: g.id,
       name: g.name,
       rating: g.rating,
-      // IGDB returns urls like //images.igdb.com/...
       coverUrl: g.cover?.url
         ? "https:" + g.cover.url.replace("t_thumb", "t_cover_big")
         : "",

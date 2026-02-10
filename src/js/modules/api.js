@@ -4,13 +4,13 @@ function assertBase() {
   if (!BASE) throw new Error("Missing VITE_API_BASE in .env");
 }
 
-export async function searchGames(query) {
+export async function searchGames({ q, sort = "", platform = "" }) {
   assertBase();
 
   const res = await fetch(`${BASE}/api/search`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ q: query }),
+    body: JSON.stringify({ q, sort, platform }),
   });
 
   const data = await res.json().catch(() => null);

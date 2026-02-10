@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
@@ -33,9 +32,7 @@ async function getToken() {
   const res = await fetch(url, { method: "POST" });
   const text = await res.text();
 
-  if (!res.ok) {
-    throw new Error(`Token error ${res.status}: ${text}`);
-  }
+  if (!res.ok) throw new Error(`Token error ${res.status}: ${text}`);
 
   const data = JSON.parse(text);
   cachedToken = data.access_token;
@@ -58,21 +55,18 @@ async function igdb(endpoint, body) {
   });
 
   const text = await res.text();
-
-  if (!res.ok) {
-    throw new Error(`IGDB ${endpoint} error ${res.status}: ${text}`);
-  }
+  if (!res.ok) throw new Error(`IGDB ${endpoint} error ${res.status}: ${text}`);
 
   return JSON.parse(text);
 }
 
-// --- Root ---
 app.get("/", (req, res) => {
   res.send(
     "IGDB Proxy is running ✅ Endpoints: POST /api/search, GET /api/game/:id, GET /api/game/:id/screenshots"
   );
 });
 
+// optional browser test: /api/search?q=mario
 app.get("/api/search", async (req, res) => {
   try {
     const q = String(req.query.q || "").trim();
@@ -93,20 +87,18 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Main endpoint your frontend uses
+// Main endpoint: supports platform filter.
+// IMPORTANT: no "sort" here because IGDB forbids search+sort.
 app.post("/api/search", async (req, res) => {
   try {
     const q = String(req.body.q || "").trim();
-    const sort = String(req.body.sort || "").trim(); // "-rating", "-first_release_date", "name"
-    const platform = Number(req.body.platform || 0); // 6, 48, 49, 130...
+    const platform = Number(req.body.platform || 0);
 
     if (!q) return res.status(400).json({ error: "Missing q" });
 
     const whereParts = [];
     if (platform) whereParts.push(`platforms = (${platform})`);
-
     const whereClause = whereParts.length ? `where ${whereParts.join(" & ")};` : "";
-    const sortClause = sort ? `sort ${sort};` : "";
 
     const data = await igdb(
       "games",
@@ -114,7 +106,6 @@ app.post("/api/search", async (req, res) => {
       search "${q.replaceAll('"', '\\"')}";
       fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
       ${whereClause}
-      ${sortClause}
       limit 24;
     `
     );
@@ -125,7 +116,6 @@ app.post("/api/search", async (req, res) => {
   }
 });
 
-// Game details
 app.get("/api/game/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -146,7 +136,6 @@ app.get("/api/game/:id", async (req, res) => {
   }
 });
 
-// Screenshots
 app.get("/api/game/:id/screenshots", async (req, res) => {
   try {
     const id = Number(req.params.id);

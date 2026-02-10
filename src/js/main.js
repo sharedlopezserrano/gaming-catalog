@@ -22,6 +22,16 @@ function toCoverBig(url) {
   return ("https:" + url).replace("t_thumb", "t_cover_big");
 }
 
+function applySort(sortValue) {
+  if (sortValue === "-rating") {
+    lastResults.sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1));
+  } else if (sortValue === "-first_release_date") {
+    lastResults.sort((a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0));
+  } else if (sortValue === "name") {
+    lastResults.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }
+}
+
 function refreshFavoritesUI() {
   const favs = getFavorites();
   const favIds = getFavoriteIds();
@@ -48,15 +58,19 @@ searchForm.addEventListener("submit", async (e) => {
   resultsGrid.innerHTML = "";
 
   try {
-    const games = await searchGames(q);
+    const platform = platformSelect?.value || "";
+    const games = await searchGames({ q, platform });
 
     lastResults = games.map((g) => ({
       id: g.id,
       name: g.name,
-      rating: g.rating,
+      rating: Number.isFinite(g.rating) ? g.rating : null,
       releaseYear: unixToYear(g.first_release_date),
       coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
     }));
+
+    const sort = sortSelect?.value || "";
+    applySort(sort);
 
     refreshResultsUI();
     statusText.textContent = `Found ${lastResults.length} games for "${q}"`;
@@ -96,6 +110,14 @@ function onFavClick(e) {
 
 resultsGrid.addEventListener("click", onFavClick);
 favoritesGrid.addEventListener("click", onFavClick);
+
+// change events
+sortSelect?.addEventListener("change", () => {
+  applySort(sortSelect.value);
+  refreshResultsUI();
+});
+
+platformSelect?.addEventListener("change", () => searchForm.requestSubmit());
 
 searchInput.addEventListener("input", () => {
   if (searchInput.value.trim() === "") statusText.textContent = "Ready to search…";

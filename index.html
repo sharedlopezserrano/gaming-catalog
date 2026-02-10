@@ -1,0 +1,33 @@
+<head>
+  <title>Gaming Catalog</title>
+  <link rel="icon" href="public/favicon.ico">
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+      <img src="/logo.png" alt="Gaming Catalog logo" class="logo" />
+      <div>
+        <div class="brand-title">Gaming Catalog Web App</div>
+      </div>
+</div>
+
+      <form class="searchbar" id="searchForm">
+        <input id="searchInput" type="search" placeholder="Search a game..." autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2 class="section-title">Favorites</h2>
+    <section class="grid" id="favoritesGrid"></section>
+
+    <h2 class="section-title">Results</h2>
+    <section class="grid" id="resultsGrid"></section>
+
+    <p id="statusText" class="section-title"></p>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>

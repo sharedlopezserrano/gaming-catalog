@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Info</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="/">
+          <span>⬅ Back</span>
+          <span class="badge">Game Info</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="container">
+      <h1 id="title">Loading...</h1>
+      <p class="section-title" id="gameIdText"></p>
+    </main>
+
+    <script type="module">
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      document.querySelector("#gameIdText").textContent = id ? `Game ID: ${id}` : "No ID found.";
+      document.querySelector("#title").textContent = "Game Info Page (API next)";
+    </script>
+  </body>
+</html>

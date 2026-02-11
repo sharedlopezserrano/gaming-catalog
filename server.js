@@ -180,9 +180,9 @@ app.get("/api/top-rated", async (req, res) => {
     const genre = Number(req.query.genre || 0);
 
     const whereParts = [
-      "rating != null",
-      "version_parent = null",
-      "category = (0,8,9,10)" // main game + expansions/remakes etc
+      "category = 0",
+      "first_release_date > 0",
+      "(total_rating > 0 | rating > 0)"
     ];
 
     if (platform) whereParts.push(`platforms = (${platform})`);
@@ -191,9 +191,9 @@ app.get("/api/top-rated", async (req, res) => {
     let data = await igdb(
       "games",
       `
-      fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+      fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
       where ${whereParts.join(" & ")};
-      sort rating desc;
+      sort total_rating desc;
       limit 24;
     `
     );
@@ -202,9 +202,9 @@ app.get("/api/top-rated", async (req, res) => {
       data = await igdb(
         "games",
         `
-        fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
-        where rating != null & version_parent = null & category = (0,8,9,10);
-        sort rating desc;
+        fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
+        where category = 0 & first_release_date > 0 & (total_rating > 0 | rating > 0);
+        sort total_rating desc;
         limit 24;
       `
       );
@@ -223,10 +223,9 @@ app.get("/api/new-releases", async (req, res) => {
     const now = Math.floor(Date.now() / 1000);
 
     const whereParts = [
-      "first_release_date != null",
-      `first_release_date <= ${now}`,
-      "version_parent = null",
-      "category = (0,8,9,10)"
+      "category = 0",
+      "first_release_date > 0",
+      `first_release_date <= ${now}`
     ];
 
     if (platform) whereParts.push(`platforms = (${platform})`);
@@ -235,7 +234,7 @@ app.get("/api/new-releases", async (req, res) => {
     let data = await igdb(
       "games",
       `
-      fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+      fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
       where ${whereParts.join(" & ")};
       sort first_release_date desc;
       limit 24;
@@ -246,8 +245,8 @@ app.get("/api/new-releases", async (req, res) => {
       data = await igdb(
         "games",
         `
-        fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
-        where first_release_date != null & first_release_date <= ${now} & version_parent = null & category = (0,8,9,10);
+        fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
+        where category = 0 & first_release_date > 0 & first_release_date <= ${now};
         sort first_release_date desc;
         limit 24;
       `

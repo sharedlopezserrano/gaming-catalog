@@ -179,20 +179,17 @@ app.get("/api/top-rated", async (req, res) => {
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
 
-    const whereParts = [
-      "category = 0",
-      "first_release_date > 0",
-      "(total_rating > 0 | rating > 0)"
-    ];
-
+    const whereParts = [];
     if (platform) whereParts.push(`platforms = (${platform})`);
     if (genre) whereParts.push(`genres = (${genre})`);
+
+    const whereClause = whereParts.length ? `where ${whereParts.join(" & ")};` : "";
 
     let data = await igdb(
       "games",
       `
       fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
-      where ${whereParts.join(" & ")};
+      ${whereClause}
       sort total_rating desc;
       limit 24;
     `
@@ -203,7 +200,6 @@ app.get("/api/top-rated", async (req, res) => {
         "games",
         `
         fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
-        where category = 0 & first_release_date > 0 & (total_rating > 0 | rating > 0);
         sort total_rating desc;
         limit 24;
       `
@@ -220,14 +216,8 @@ app.get("/api/new-releases", async (req, res) => {
   try {
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
-    const now = Math.floor(Date.now() / 1000);
 
-    const whereParts = [
-      "category = 0",
-      "first_release_date > 0",
-      `first_release_date <= ${now}`
-    ];
-
+    const whereParts = ["first_release_date > 0"];
     if (platform) whereParts.push(`platforms = (${platform})`);
     if (genre) whereParts.push(`genres = (${genre})`);
 
@@ -246,7 +236,7 @@ app.get("/api/new-releases", async (req, res) => {
         "games",
         `
         fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
-        where category = 0 & first_release_date > 0 & first_release_date <= ${now};
+        where first_release_date > 0;
         sort first_release_date desc;
         limit 24;
       `

@@ -166,22 +166,20 @@ function setActiveNav(view) {
 function showHomeView() {
   setActiveNav("home");
   statusText.textContent = "";
+
   homeSection?.classList.remove("hidden");
+  statusText?.classList.remove("hidden");
 
   favoritesTitle?.classList.remove("hidden");
   favoritesGrid?.classList.remove("hidden");
-
-  resultsTitle?.classList.remove("hidden");
-  resultsSection?.classList.remove("hidden");
 }
 
 function showFavoritesView() {
   setActiveNav("favorites");
   statusText.textContent = "";
-  homeSection?.classList.add("hidden");
 
-  resultsTitle?.classList.add("hidden");
-  resultsSection?.classList.add("hidden");
+  homeSection?.classList.add("hidden");       
+  statusText?.classList.add("hidden");
 
   favoritesTitle?.classList.remove("hidden");
   favoritesGrid?.classList.remove("hidden");
@@ -191,6 +189,7 @@ function showFavoritesView() {
 
 async function loadPreset(kind) {
   try {
+    setActiveNav(kind === "top" ? "top" : "new");
     const platform = platformSelect?.value || "";
     const genre = genreSelect?.value || "";
 
@@ -220,6 +219,7 @@ async function loadPreset(kind) {
     console.error(e);
     statusText.textContent = `Error: ${e.message}`;
   }
+  
 }
 
 navLinks.forEach((a) => {
@@ -258,7 +258,6 @@ navLinks.forEach((a) => {
 
 /* ---------------- Controls events ---------------- */
 sortSelect?.addEventListener("change", () => {
-  // Sort only makes sense for search results (home view)
   if (currentView !== "home") return;
   applySort(sortSelect.value);
   refreshResultsUI();

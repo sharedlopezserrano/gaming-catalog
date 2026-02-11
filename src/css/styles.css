@@ -394,6 +394,10 @@ main{ padding: 22px 0 60px; }
   gap: 10px;
   flex-wrap: wrap;
 }
+
+.hidden { 
+  display: none !important; 
+}
 @media (max-width: 900px){
   .results-layout{
     grid-template-columns: 1fr;

@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_BASE;
+const BASE = (import.meta.env.VITE_API_BASE || "").replace(/\/+$/, "");
 
 function assertBase() {
   if (!BASE) throw new Error("Missing VITE_API_BASE in .env");

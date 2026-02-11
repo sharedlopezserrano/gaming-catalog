@@ -192,81 +192,58 @@ app.get("/api/genres", async (req, res) => {
 
 app.get("/api/top-rated", async (req, res) => {
   try {
+    res.set("Cache-Control", "no-store"); // evita que te quede pegado un [] cacheado
+
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
 
-    const baseFilter = [];
-    if (platform) baseFilter.push(`platforms = (${platform})`);
-    if (genre) baseFilter.push(`genres = (${genre})`);
+    const extra = [];
+    if (platform) extra.push(`platforms = (${platform})`);
+    if (genre) extra.push(`genres = (${genre})`);
 
-    const fields =
-      "fields id,name,summary,total_rating,total_rating_count,rating,rating_count,first_release_date,cover.url,genres.name,platforms.name;";
+    const fields = `
+      fields id,name,summary,total_rating,total_rating_count,rating,rating_count,
+      first_release_date,cover.url,genres.name,platforms.name;
+    `;
 
-    // Helper: try one query, return [] if empty
-    const tryQuery = async (where, sort) => {
-      const q = `
+    // 1) Top rated usando total_rating
+    let data = await igdb(
+      "games",
+      `
+      ${fields}
+      where total_rating != null & first_release_date > 0 ${extra.length ? `& ${extra.join(" & ")}` : ""};
+      sort total_rating desc;
+      limit 24;
+    `
+    );
+
+    // 2) Fallback: usa rating si total_rating no devuelve nada
+    if (!Array.isArray(data) || data.length === 0) {
+      data = await igdb(
+        "games",
+        `
         ${fields}
-        where ${where};
-        sort ${sort};
+        where rating != null & first_release_date > 0 ${extra.length ? `& ${extra.join(" & ")}` : ""};
+        sort rating desc;
         limit 24;
-      `;
-      const data = await igdb("games", q);
-      return Array.isArray(data) ? data : [];
-    };
+      `
+      );
+    }
 
-    // Build "where" blocks (from strict -> loose)
-    const w1 = [
-      "category = 0",
-      "version_parent = null",
-      "first_release_date > 0",
-      "total_rating != null",
-      "total_rating_count >= 10",
-      ...baseFilter,
-    ].join(" & ");
+    // 3) Súper fallback: ignora platform/genre si te estaban dejando en 0
+    if (!Array.isArray(data) || data.length === 0) {
+      data = await igdb(
+        "games",
+        `
+        ${fields}
+        where total_rating != null & first_release_date > 0;
+        sort total_rating desc;
+        limit 24;
+      `
+      );
+    }
 
-    const w2 = [
-      "category = 0",
-      "version_parent = null",
-      "first_release_date > 0",
-      "total_rating != null",
-      // loosen counts
-      "total_rating_count >= 1",
-      ...baseFilter,
-    ].join(" & ");
-
-    const w3 = [
-      "category = 0",
-      "version_parent = null",
-      "first_release_date > 0",
-      "rating != null",
-      "rating_count >= 10",
-      ...baseFilter,
-    ].join(" & ");
-
-    const w4 = [
-      "category = 0",
-      "version_parent = null",
-      "first_release_date > 0",
-      "(total_rating != null | rating != null)",
-      ...baseFilter,
-    ].join(" & ");
-
-    // Last fallback: remove filters if platform/genre too strict
-    const w5 = [
-      "category = 0",
-      "version_parent = null",
-      "first_release_date > 0",
-      "total_rating != null",
-      "total_rating_count >= 1",
-    ].join(" & ");
-
-    let data = await tryQuery(w1, "total_rating desc");
-    if (!data.length) data = await tryQuery(w2, "total_rating desc");
-    if (!data.length) data = await tryQuery(w3, "rating desc");
-    if (!data.length) data = await tryQuery(w4, "total_rating desc");
-    if (!data.length) data = await tryQuery(w5, "total_rating desc");
-
-    res.json(data);
+    res.json(Array.isArray(data) ? data : []);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

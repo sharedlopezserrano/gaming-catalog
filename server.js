@@ -249,6 +249,33 @@ app.get("/api/new-releases", async (req, res) => {
   }
 });
 
+app.get("/api/random", async (req, res) => {
+  try {
+    const offset = Math.floor(Math.random() * 80);
+    const platform = Number(req.query.platform || 0);
+    const genre = Number(req.query.genre || 0);
+
+    const whereParts = ["first_release_date > 0"];
+    if (platform) whereParts.push(`platforms = (${platform})`);
+    if (genre) whereParts.push(`genres = (${genre})`);
+
+    const data = await igdb(
+      "games",
+      `
+      fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
+      where ${whereParts.join(" & ")};
+      sort first_release_date desc;
+      offset ${offset};
+      limit 24;
+    `
+    );
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`IGDB proxy running on port ${PORT}`));

@@ -192,7 +192,7 @@ app.get("/api/genres", async (req, res) => {
 
 app.get("/api/top-rated", async (req, res) => {
   try {
-    res.set("Cache-Control", "no-store"); // evita que te quede pegado un [] cacheado
+    res.set("Cache-Control", "no-store");
 
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
@@ -206,7 +206,6 @@ app.get("/api/top-rated", async (req, res) => {
       first_release_date,cover.url,genres.name,platforms.name;
     `;
 
-    // 1) Top rated usando total_rating
     let data = await igdb(
       "games",
       `
@@ -217,7 +216,6 @@ app.get("/api/top-rated", async (req, res) => {
     `
     );
 
-    // 2) Fallback: usa rating si total_rating no devuelve nada
     if (!Array.isArray(data) || data.length === 0) {
       data = await igdb(
         "games",
@@ -230,7 +228,7 @@ app.get("/api/top-rated", async (req, res) => {
       );
     }
 
-    // 3) Súper fallback: ignora platform/genre si te estaban dejando en 0
+    
     if (!Array.isArray(data) || data.length === 0) {
       data = await igdb(
         "games",
@@ -253,41 +251,45 @@ app.get("/api/top-rated", async (req, res) => {
 // New Releases
 app.get("/api/new-releases", async (req, res) => {
   try {
+    res.set("Cache-Control", "no-store");
+
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
     const now = Math.floor(Date.now() / 1000);
 
-    const whereParts = [
-      "first_release_date > 0",
-      `first_release_date <= ${now}`,
-      "version_parent = null",
-      "category = 0",
-      ...buildFilterWhere({ platform, genre }),
-    ];
+    const extra = [];
+    if (platform) extra.push(`platforms = (${platform})`);
+    if (genre) extra.push(`genres = (${genre})`);
+
+    const fields = `
+      fields id,name,summary,total_rating,total_rating_count,rating,rating_count,
+      first_release_date,cover.url,genres.name,platforms.name;
+    `;
 
     let data = await igdb(
       "games",
       `
-      fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
-      where ${whereParts.join(" & ")};
+      ${fields}
+      where first_release_date > 0 & first_release_date <= ${now}
+      ${extra.length ? `& ${extra.join(" & ")}` : ""};
       sort first_release_date desc;
       limit 24;
     `
     );
 
-    if (Array.isArray(data) && data.length === 0 && (platform || genre)) {
+    if (!Array.isArray(data) || data.length === 0) {
       data = await igdb(
         "games",
         `
-        fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
-        where first_release_date > 0 & first_release_date <= ${now} & version_parent = null & category = 0;
+        ${fields}
+        where first_release_date > 0 & first_release_date <= ${now};
         sort first_release_date desc;
         limit 24;
       `
       );
     }
 
-    res.json(data);
+    res.json(Array.isArray(data) ? data : []);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -296,28 +298,49 @@ app.get("/api/new-releases", async (req, res) => {
 // Random / Featured
 app.get("/api/random", async (req, res) => {
   try {
-    const offset = Math.floor(Math.random() * 80);
+    res.set("Cache-Control", "no-store");
+
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
+    const now = Math.floor(Date.now() / 1000);
 
-    const whereParts = [
-      "first_release_date > 0",
-      "category = 0",
-      ...buildFilterWhere({ platform, genre }),
-    ];
+    const extra = [];
+    if (platform) extra.push(`platforms = (${platform})`);
+    if (genre) extra.push(`genres = (${genre})`);
 
-    const data = await igdb(
+    const fields = `
+      fields id,name,summary,total_rating,total_rating_count,rating,rating_count,
+      first_release_date,cover.url,genres.name,platforms.name;
+    `;
+
+    const offset = Math.floor(Math.random() * 200);
+
+    let data = await igdb(
       "games",
       `
-      fields id,name,summary,total_rating,rating,first_release_date,cover.url,genres.name,platforms.name;
-      where ${whereParts.join(" & ")};
+      ${fields}
+      where first_release_date > 0 & first_release_date <= ${now}
+      ${extra.length ? `& ${extra.join(" & ")}` : ""};
       sort first_release_date desc;
       offset ${offset};
       limit 24;
     `
     );
 
-    res.json(data);
+    if (!Array.isArray(data) || data.length === 0) {
+      data = await igdb(
+        "games",
+        `
+        ${fields}
+        where first_release_date > 0 & first_release_date <= ${now};
+        sort first_release_date desc;
+        offset ${offset};
+        limit 24;
+      `
+      );
+    }
+
+    res.json(Array.isArray(data) ? data : []);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

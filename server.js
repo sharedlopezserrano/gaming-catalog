@@ -260,5 +260,7 @@ app.get("/api/new-releases", async (req, res) => {
   }
 });
 
+console.log("top-rated count:", Array.isArray(data) ? data.length : data);
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`IGDB proxy running on port ${PORT}`));

@@ -180,6 +180,7 @@ function showHomeView() {
   statusText.textContent = "";
 
   homeSection?.classList.remove("hidden");
+  resultsSection?.classList.remove("hidden");
   statusText?.classList.remove("hidden");
 
   favoritesTitle?.classList.remove("hidden");
@@ -192,7 +193,8 @@ function showFavoritesView() {
   setActiveNav("favorites");
   statusText.textContent = "";
 
-  homeSection?.classList.add("hidden");       
+  homeSection?.classList.add("hidden");
+  resultsSection?.classList.add("hidden");
   statusText?.classList.add("hidden");
 
   favoritesTitle?.classList.remove("hidden");
@@ -205,6 +207,10 @@ async function loadPreset(kind) {
   try {
     homeIntro?.classList.add("hidden");
     setActiveNav(kind === "top" ? "top" : "new");
+
+    // para Top/New no queremos ordenar local por el select
+    sortSelect.value = "";
+
     const platform = platformSelect?.value || "";
     const genre = genreSelect?.value || "";
 
@@ -221,12 +227,12 @@ async function loadPreset(kind) {
     }
 
     lastResults = games.map((g) => ({
-    id: g.id,
-    name: g.name,
-    rating: pickRating(g),
-    releaseYear: unixToYear(g.first_release_date),
-    coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
-  }));
+      id: g.id,
+      name: g.name,
+      rating: pickRating(g),
+      releaseYear: unixToYear(g.first_release_date),
+      coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
+    }));
 
     refreshResultsUI();
     statusText.textContent = `Showing ${lastResults.length} games`;
@@ -234,7 +240,6 @@ async function loadPreset(kind) {
     console.error(e);
     statusText.textContent = `Error: ${e.message}`;
   }
-  
 }
 
 navLinks.forEach((a) => {
@@ -245,7 +250,8 @@ navLinks.forEach((a) => {
     if (view === "home") {
       currentView = "home";
       showHomeView();
-      resultsTitle.textContent = "Results";
+      resultsTitle.textContent = "Featured Games";
+      loadHomeRandom();
       return;
     }
 
@@ -282,16 +288,15 @@ async function loadHomeRandom() {
     const games = await getRandomGames({ platform, genre });
 
     lastResults = games.map((g) => ({
-    id: g.id,
-    name: g.name,
-    rating: pickRating(g),
-    releaseYear: unixToYear(g.first_release_date),
-    coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
-  }));
+      id: g.id,
+      name: g.name,
+      rating: pickRating(g),
+      releaseYear: unixToYear(g.first_release_date),
+      coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
+    }));
 
     resultsTitle.textContent = "Featured Games";
     refreshResultsUI();
-
     statusText.textContent = `Showing ${lastResults.length} games`;
   } catch (e) {
     console.error(e);
@@ -309,13 +314,13 @@ sortSelect?.addEventListener("change", () => {
 platformSelect?.addEventListener("change", () => {
   if (currentView === "top") return loadPreset("top");
   if (currentView === "new") return loadPreset("new");
-  searchForm.requestSubmit();
+  if (currentView === "home") return loadHomeRandom();
 });
 
 genreSelect?.addEventListener("change", () => {
   if (currentView === "top") return loadPreset("top");
   if (currentView === "new") return loadPreset("new");
-  searchForm.requestSubmit();
+  if (currentView === "home") return loadHomeRandom();
 });
 
 searchInput.addEventListener("input", () => {

@@ -50,9 +50,8 @@ export function renderGameCards(containerEl, games, favoriteIds = new Set()) {
 function toStarsText(r) {
   if (!Number.isFinite(r) || r <= 0) return "N/A";
 
-  const stars = r / 20; // 100 => 5
+  const stars = r / 20;
 
-  // deja 1 decimal, pero si termina en .0 lo quita
   const fixed = stars.toFixed(1);
   const clean = fixed.endsWith(".0") ? fixed.slice(0, -2) : fixed;
 

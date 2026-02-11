@@ -181,13 +181,14 @@ app.get("/api/top-rated", async (req, res) => {
 
     const whereParts = [
       "rating != null",
-      "rating_count > 50",
-      "category = 0"
+      "version_parent = null",
+      "category = (0,8,9,10)" // main game + expansions/remakes etc
     ];
+
     if (platform) whereParts.push(`platforms = (${platform})`);
     if (genre) whereParts.push(`genres = (${genre})`);
 
-    const data = await igdb(
+    let data = await igdb(
       "games",
       `
       fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
@@ -196,6 +197,18 @@ app.get("/api/top-rated", async (req, res) => {
       limit 24;
     `
     );
+
+    if (Array.isArray(data) && data.length === 0 && (platform || genre)) {
+      data = await igdb(
+        "games",
+        `
+        fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+        where rating != null & version_parent = null & category = (0,8,9,10);
+        sort rating desc;
+        limit 24;
+      `
+      );
+    }
 
     res.json(data);
   } catch (e) {
@@ -207,15 +220,19 @@ app.get("/api/new-releases", async (req, res) => {
   try {
     const platform = Number(req.query.platform || 0);
     const genre = Number(req.query.genre || 0);
+    const now = Math.floor(Date.now() / 1000);
 
     const whereParts = [
       "first_release_date != null",
-      "category = 0"
+      `first_release_date <= ${now}`,
+      "version_parent = null",
+      "category = (0,8,9,10)"
     ];
+
     if (platform) whereParts.push(`platforms = (${platform})`);
     if (genre) whereParts.push(`genres = (${genre})`);
 
-    const data = await igdb(
+    let data = await igdb(
       "games",
       `
       fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
@@ -224,6 +241,18 @@ app.get("/api/new-releases", async (req, res) => {
       limit 24;
     `
     );
+
+    if (Array.isArray(data) && data.length === 0 && (platform || genre)) {
+      data = await igdb(
+        "games",
+        `
+        fields id,name,summary,rating,first_release_date,cover.url,genres.name,platforms.name;
+        where first_release_date != null & first_release_date <= ${now} & version_parent = null & category = (0,8,9,10);
+        sort first_release_date desc;
+        limit 24;
+      `
+      );
+    }
 
     res.json(data);
   } catch (e) {

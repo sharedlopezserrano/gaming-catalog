@@ -69,3 +69,16 @@ export async function getNewReleases({ platform = "", genre = "" } = {}) {
   if (!res.ok) throw new Error(data?.error || `New releases failed (${res.status})`);
   return data;
 }
+
+export async function getRandomGames({ platform = "", genre = "" } = {}) {
+  assertBase();
+  const params = new URLSearchParams();
+  if (platform) params.set("platform", platform);
+  if (genre) params.set("genre", genre);
+
+  const qs = params.toString();
+  const res = await fetch(`${BASE}/api/random${qs ? `?${qs}` : ""}`);
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error || `Random failed (${res.status})`);
+  return data;
+}

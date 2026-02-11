@@ -9,7 +9,7 @@ export function renderGameCards(containerEl, games, favoriteIds = new Set()) {
   const base = import.meta.env.BASE_URL;
 
   const cards = games.map((g) => {
-    const ratingText = Number.isFinite(g.rating) ? `${Math.round(g.rating)}` : "N/A";
+    const ratingText = toStarsText(g.rating);
     const isFav = favoriteIds.has(Number(g.id));
 
     return `
@@ -45,6 +45,18 @@ export function renderGameCards(containerEl, games, favoriteIds = new Set()) {
   });
 
   containerEl.innerHTML = cards.join("");
+}
+
+function toStarsText(r) {
+  if (!Number.isFinite(r) || r <= 0) return "N/A";
+
+  const stars = r / 20; // 100 => 5
+
+  // deja 1 decimal, pero si termina en .0 lo quita
+  const fixed = stars.toFixed(1);
+  const clean = fixed.endsWith(".0") ? fixed.slice(0, -2) : fixed;
+
+  return `${clean}/5`;
 }
 
 function escapeHtml(str = "") {

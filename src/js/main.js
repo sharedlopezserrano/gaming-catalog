@@ -1,5 +1,5 @@
 import { renderGameCards } from "./modules/ui.js";
-import { searchGames, getGenres, getTopRated, getNewReleases } from "./modules/api.js";
+import { searchGames, getGenres, getTopRated, getNewReleases, getRandomGames } from "./modules/api.js";
 import { getFavorites, getFavoriteIds, addFavorite, removeFavorite } from "./modules/storage.js";
 
 const searchForm = document.querySelector("#searchForm");
@@ -25,6 +25,15 @@ let currentView = "home";
 function unixToYear(unix) {
   if (!unix) return null;
   return new Date(unix * 1000).getFullYear();
+}
+
+function pickRating(g) {
+  const tr = Number(g?.total_rating);
+  const r = Number(g?.rating);
+
+  if (Number.isFinite(tr) && tr > 0) return tr;
+  if (Number.isFinite(r) && r > 0) return r;
+  return null;
 }
 
 function toCoverBig(url) {
@@ -86,6 +95,8 @@ async function loadGenres() {
 }
 
 loadGenres();
+showHomeView();
+loadHomeRandom();
 
 /* ---------------- Search (Home) ---------------- */
 searchForm.addEventListener("submit", async (e) => {
@@ -109,7 +120,7 @@ searchForm.addEventListener("submit", async (e) => {
     lastResults = games.map((g) => ({
       id: g.id,
       name: g.name,
-      rating: Number.isFinite(g.rating) ? g.rating : null,
+      rating: pickRating(g),
       releaseYear: unixToYear(g.first_release_date),
       coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
     }));
@@ -210,12 +221,12 @@ async function loadPreset(kind) {
     }
 
     lastResults = games.map((g) => ({
-      id: g.id,
-      name: g.name,
-      rating: Number.isFinite(g.rating) ? g.rating : null,
-      releaseYear: unixToYear(g.first_release_date),
-      coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
-    }));
+    id: g.id,
+    name: g.name,
+    rating: pickRating(g),
+    releaseYear: unixToYear(g.first_release_date),
+    coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
+  }));
 
     refreshResultsUI();
     statusText.textContent = `Showing ${lastResults.length} games`;
@@ -259,6 +270,34 @@ navLinks.forEach((a) => {
     }
   });
 });
+
+async function loadHomeRandom() {
+  try {
+    const platform = platformSelect?.value || "";
+    const genre = genreSelect?.value || "";
+
+    statusText.textContent = "Loading featured games...";
+    resultsGrid.innerHTML = "";
+
+    const games = await getRandomGames({ platform, genre });
+
+    lastResults = games.map((g) => ({
+    id: g.id,
+    name: g.name,
+    rating: pickRating(g),
+    releaseYear: unixToYear(g.first_release_date),
+    coverUrl: g.cover?.url ? toCoverBig(g.cover.url) : "",
+  }));
+
+    resultsTitle.textContent = "Featured Games";
+    refreshResultsUI();
+
+    statusText.textContent = `Showing ${lastResults.length} games`;
+  } catch (e) {
+    console.error(e);
+    statusText.textContent = `Error: ${e.message}`;
+  }
+}
 
 /* ---------------- Controls events ---------------- */
 sortSelect?.addEventListener("change", () => {

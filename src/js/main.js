@@ -17,6 +17,7 @@ const homeSection = document.querySelector("#homeSection");
 const favoritesTitle = document.querySelector("#favoritesSectionTitle");
 const resultsTitle = document.querySelector("#resultsTitle");
 const resultsSection = document.querySelector("#resultsSection");
+const homeIntro = document.querySelector("#homeIntro");
 
 let lastResults = [];
 let currentView = "home";
@@ -172,6 +173,8 @@ function showHomeView() {
 
   favoritesTitle?.classList.remove("hidden");
   favoritesGrid?.classList.remove("hidden");
+
+  homeIntro?.classList.remove("hidden");
 }
 
 function showFavoritesView() {
@@ -189,6 +192,7 @@ function showFavoritesView() {
 
 async function loadPreset(kind) {
   try {
+    homeIntro?.classList.add("hidden");
     setActiveNav(kind === "top" ? "top" : "new");
     const platform = platformSelect?.value || "";
     const genre = genreSelect?.value || "";

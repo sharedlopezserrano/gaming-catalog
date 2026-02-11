@@ -26,31 +26,34 @@
 
     <main class="container">
       <section id="homeSection">
-        <section class="hero">
-          <div class="hero-text">
-            <h1>Welcome to Gaming Catalog</h1>
-            <p>
-              Search games fast, explore details, and save your favorites — perfect for games you
-              love (or want to buy later).
-            </p>
-          </div>
+        <!-- ✅ Only Home should show this -->
+        <div id="homeIntro">
+          <section class="hero">
+            <div class="hero-text">
+              <h1>Welcome to Gaming Catalog</h1>
+              <p>
+                Search games fast, explore details, and save your favorites — perfect for games you
+                love (or want to buy later).
+              </p>
+            </div>
 
-          <div class="hero-badges">
-            <span class="pill">Search + Filters</span>
-            <span class="pill">Top Rated / New</span>
-            <span class="pill">Favorites</span>
-          </div>
-        </section>
+            <div class="hero-badges">
+              <span class="pill">Search + Filters</span>
+              <span class="pill">Top Rated / New</span>
+              <span class="pill">Favorites</span>
+            </div>
+          </section>
 
-        <form class="searchbar" id="searchForm">
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Search a game..."
-            autocomplete="off"
-          />
-          <button class="btn" type="submit">Search</button>
-        </form>
+          <form class="searchbar" id="searchForm">
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search a game..."
+              autocomplete="off"
+            />
+            <button class="btn" type="submit">Search</button>
+          </form>
+        </div>
 
         <h2 class="section-title" id="resultsTitle">Results</h2>
 

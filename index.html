@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gaming Catalog </title>
+    
+    <link rel="icon" href="/gaming-catalog/favicon.ico" />
+    <script type="module" crossorigin src="/gaming-catalog/assets/main-TDLReWuP.js"></script>
+    <link rel="modulepreload" crossorigin href="/gaming-catalog/assets/api-YP764B8w.js">
+    <link rel="stylesheet" crossorigin href="/gaming-catalog/assets/api-DSLwq4to.css">
+  </head>
+
+  <body>
+    <header>
+      <div class="container nav">
+        <div class="brand">
+          <img src="/gaming-catalog/logo.png" alt="Gaming Catalog logo" class="logo" />
+          <div class="brand-title">Gaming Catalog Web App</div>
+
+          <nav class="nav-links">
+            <a href="#" class="nav-link is-active" data-view="home">Home</a>
+            <a href="#" class="nav-link" data-view="favorites">Favorites</a>
+            <a href="#" class="nav-link" data-view="top">Top Rated</a>
+            <a href="#" class="nav-link" data-view="new">New Releases</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="homeSection">
+        <div id="homeIntro">
+          <section class="hero">
+            <div class="hero-text">
+              <h1>Welcome to Gaming Catalog</h1>
+              <p>
+                Search games fast, explore details, and save your favorites — perfect for games you
+                love (or want to buy later). To use the Filter try searching Mario, Doom, Call of Duty, Pacman, etc
+              </p>
+              <p> You can add your favorites with click in the heart button</p>
+              <p>There is a Top Rated / New Releases section</p>
+            </div>
+
+            <div class="hero-badges">
+              <span class="pill">Search + Filters</span>
+              <span class="pill">Top Rated / New</span>
+              <span class="pill">Favorites</span>
+            </div>
+          </section>
+
+          <form class="searchbar" id="searchForm">
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search a game..."
+              autocomplete="off"
+            />
+            <button class="btn" type="submit">Search</button>
+          </form>
+        </div>
+
+        <h2 class="section-title" id="resultsTitle">Results</h2>
+
+        <div class="results-layout" id="resultsSection">
+          <aside class="filters-panel">
+            <label>
+              Genre:
+              <select id="genreSelect">
+                <option value="">All</option>
+              </select>
+            </label>
+
+            <label>
+              Sort:
+              <select id="sortSelect">
+                <option value="">Relevance</option>
+                <option value="-rating">Top Rated</option>
+                <option value="-first_release_date">Newest</option>
+                <option value="name">A-Z</option>
+              </select>
+            </label>
+
+            <label>
+              Platform:
+              <select id="platformSelect">
+                <option value="">All</option>
+                <option value="6">PC (Windows)</option>
+                <option value="48">PlayStation 4</option>
+                <option value="49">Xbox One</option>
+                <option value="130">Nintendo Switch</option>
+              </select>
+            </label>
+          </aside>
+
+          <section class="grid" id="resultsGrid"></section>
+        </div>
+
+        <p id="statusText" class="section-title"></p>
+      </section>
+
+      <h2 class="section-title" id="favoritesSectionTitle">Favorites</h2>
+      <section class="favorites-grid" id="favoritesGrid"></section>
+    </main>
+
+  </body>
+</html>

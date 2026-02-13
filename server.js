@@ -68,13 +68,6 @@ function buildFilterWhere({ platform = 0, genre = 0 } = {}) {
   return parts;
 }
 
-async function firstNonEmpty(queries) {
-  for (const q of queries) {
-    const data = await igdb("games", q);
-    if (Array.isArray(data) && data.length > 0) return data;
-  }
-  return [];
-}
 
 app.get("/", (req, res) => {
   res.send(

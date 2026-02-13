@@ -21,6 +21,8 @@ const homeIntro = document.querySelector("#homeIntro");
 
 let lastResults = [];
 let currentView = "home";
+let lastQuery = "";
+
 
 function unixToYear(unix) {
   if (!unix) return null;
@@ -109,6 +111,7 @@ searchForm.addEventListener("submit", async (e) => {
     return;
   }
 
+  lastQuery = q;
   statusText.textContent = "Loading...";
   resultsGrid.innerHTML = "";
 
@@ -314,13 +317,28 @@ sortSelect?.addEventListener("change", () => {
 platformSelect?.addEventListener("change", () => {
   if (currentView === "top") return loadPreset("top");
   if (currentView === "new") return loadPreset("new");
-  if (currentView === "home") return loadHomeRandom();
+
+
+  if (currentView === "home") {
+    if (lastQuery) {
+      searchInput.value = lastQuery;
+      return searchForm.requestSubmit();
+    }
+    return loadHomeRandom();
+  }
 });
 
 genreSelect?.addEventListener("change", () => {
   if (currentView === "top") return loadPreset("top");
   if (currentView === "new") return loadPreset("new");
-  if (currentView === "home") return loadHomeRandom();
+
+  if (currentView === "home") {
+    if (lastQuery) {
+      searchInput.value = lastQuery;
+      return searchForm.requestSubmit();
+    }
+    return loadHomeRandom();
+  }
 });
 
 searchInput.addEventListener("input", () => {
